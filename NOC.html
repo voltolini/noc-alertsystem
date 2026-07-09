@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> NOC Alert System </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2E75B6;
+            --primary-light: #3498DB;
+            --danger: #E74C3C;
+            --danger-dark: #A32D2D;
+            --success: #27AE60;
+            --warning: #F39C12;
+            --bg-dark: #0F1419;
+            --bg-card: #1A2332;
+            --bg-light: #252E3C;
+            --bg-white: #1A2332;
+            --text-primary: #FFFFFF;
+            --text-secondary: #8A9FB1;
+            --text-muted: #5C6E82;
+            --border-color: #2E3E52;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--primary-light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--primary-light);
+            color: white;
+        }
+
+        .btn:hover {
+            background: #2663A0;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(46, 117, 182, 0.25);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-light);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2663A0;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--primary-light);
+            border: 1px solid var(--primary-light);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--primary-light);
+            color: white;
+        }
+
+        .form-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary-light);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s ease;
+            background: var(--bg-light);
+            color: var(--text-primary);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(46, 117, 182, 0.2);
+            background: var(--bg-light);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-full {
+            grid-column: 1 / -1;
+        }
+
+        .noc-alert {
+            background: var(--bg-card);
+            border: 2px solid var(--danger);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .noc-alert-header {
+            background: linear-gradient(135deg, #9DB4C4, #8FA3B3);
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .alert-priority-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .alert-priority-dot.status-p0 {
+            background: #E74C3C;
+        }
+
+        .alert-priority-dot.status-p1 {
+            background: #E67E22;
+        }
+
+        .alert-priority-dot.status-p2 {
+            background: #F39C12;
+        }
+
+        .alert-priority-dot.status-p3 {
+            background: #F1C40F;
+        }
+
+        .alert-priority-dot.status-p4 {
+            background: #3498DB;
+        }
+
+        .alert-header-text h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .alert-header-text p {
+            font-size: 14px;
+            opacity: 0.95;
+        }
+
+        .noc-alert-content {
+            padding: 1.5rem;
+        }
+
+        .alert-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-section-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .alert-section-title i {
+            font-size: 14px;
+            color: var(--primary-light);
+        }
+
+        .alert-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .alert-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .alert-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+        }
+
+        .alert-value {
+            font-size: 15px;
+            color: var(--text-primary);
+            word-break: break-word;
+        }
+
+        .alert-value.critical {
+            color: var(--danger-dark);
+            font-weight: 600;
+        }
+
+        .alert-value.muted {
+            color: var(--text-muted);
+        }
+
+        .alert-value.code {
+            font-family: 'Courier New', monospace;
+            background: #F5F5F5;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .timeline {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .timeline-item {
+            flex: 1;
+        }
+
+        .timeline-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .timeline-value {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .impacted-items {
+            background: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .impacted-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .impacted-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .impacted-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        .impacted-value {
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            color: var(--text-primary);
+            background: var(--bg-dark);
+            padding: 8px 12px;
+            border-radius: 4px;
+            word-break: break-all;
+        }
+
+        .alert-footer {
+            background: var(--bg-light);
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-p0 {
+            background: #FADBD8;
+            color: #C0392B;
+        }
+
+        .status-p0 .status-dot {
+            background: #E74C3C;
+        }
+
+        .status-p1 {
+            background: #FDEBD0;
+            color: #D35400;
+        }
+
+        .status-p1 .status-dot {
+            background: #E67E22;
+        }
+
+        .status-p2 {
+            background: #FCF3CF;
+            color: #D68910;
+        }
+
+        .status-p2 .status-dot {
+            background: #F39C12;
+        }
+
+        .status-p3 {
+            background: #FEF9E7;
+            color: #D4AF37;
+        }
+
+        .status-p3 .status-dot {
+            background: #F1C40F;
+        }
+
+        .status-p4 {
+            background: #D6EAF8;
+            color: #2874A6;
+        }
+
+        .status-p4 .status-dot {
+            background: #3498DB;
+        }
+
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+            }
+
+            .header-actions,
+            .form-section,
+            .alert-footer {
+                display: none;
+            }
+
+            .noc-alert {
+                box-shadow: none;
+                page-break-inside: avoid;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .alert-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .timeline {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .noc-alert-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .alert-footer {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+            background: #2E75B6;
+        }
+
+        .toast.success {
+            background: #27AE60;
+        }
+
+        .toast.error {
+            background: #E74C3C;
+        }
+
+        .toast.warning {
+            background: #F39C12;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-bell"></i> NOC Alert System</h1>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="resetForm()">
+                    <i class="fas fa-redo"></i> Limpar
+                </button>
+                <button class="btn btn-primary" onclick="generateAlert()">
+                    <i class="fas fa-arrow-right"></i> Gerar Alerta
+                </button>
+            </div>
+        </div>
+
+        <!-- FORMULÁRIO -->
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fas fa-edit"></i> Informações do Chamado
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>ID do Chamado</label>
+                    <input type="text" id="chamadoId" placeholder="Ex: 31962422">
+                </div>
+
+                <div class="form-group">
+                    <label>Prioridade</label>
+                    <select id="prioridade">
+                        <option value="">-- Selecione uma prioridade --</option>
+                        <option value="P0">P0 - Desastre</option>
+                        <option value="P1">P1 - Crítica</option>
+                        <option value="P2">P2 - Alta</option>
+                        <option value="P3">P3 - Média</option>
+                        <option value="P4">P4 - Baixa</option>
+                    </select>
+                </div>
+
+                <div class="form-group form-full">
+                    <label>Descrição do Alerta</label>
+                    <textarea id="descricao" placeholder="Ex: Windows: Alta utilização de CPU (over 90% por 10m)"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Grupo Solucionador</label>
+                    <input type="text" id="grupo" placeholder="Ex: DELL, HP, Infraestrutura">
+                </div>
+
+                <div class="form-group">
+                    <label>Status</label>
+                    <input type="text" id="status" placeholder="Status atual">
+                </div>
+
+                <div class="form-group">
+                    <label>Impacto</label>
+                    <input type="text" id="impacto" placeholder="Descrição do impacto">
+                </div>
+
+                <div class="form-group">
+                    <label>Sistema Afetado</label>
+                    <input type="text" id="sistema" placeholder="Nome do sistema">
+                </div>
+
+                <div class="form-group">
+                    <label>Início (Data/Hora)</label>
+                    <input type="text" id="inicio" placeholder="Ex: 08/07 16:05h">
+                </div>
+
+                <div class="form-group">
+                    <label>Término (Data/Hora)</label>
+                    <input type="text" id="fim" placeholder="Deixe em branco se em aberto">
+                </div>
+
+                <div class="form-group form-full">
+                    <label>IC Afetado (Item de Configuração)</label>
+                    <textarea id="icAfetado" placeholder="SRV | BR000VPW092 | Novo_Pam_Servidor_Pam_Gateway_Logic_Apps- Dell"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- PREVIEW DO ALERTA -->
+        <div id="alertPreview"></div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script>
+        function generateAlert() {
+            const chamadoId = document.getElementById('chamadoId').value || 'N/A';
+            const prioridade = document.getElementById('prioridade').value || 'N/A';
+            const descricao = document.getElementById('descricao').value || 'N/A';
+            const grupo = document.getElementById('grupo').value || 'N/A';
+            const status = document.getElementById('status').value || 'N/A';
+            const impacto = document.getElementById('impacto').value || 'Não especificado';
+            const sistema = document.getElementById('sistema').value || 'Não especificado';
+            const inicio = document.getElementById('inicio').value || 'N/A';
+            const fim = document.getElementById('fim').value || 'Em aberto';
+            const icAfetado = document.getElementById('icAfetado').value || 'N/A';
+
+            const priorityClass = prioridade === 'P0' ? 'status-p0' : prioridade === 'P1' ? 'status-p1' : prioridade === 'P2' ? 'status-p2' : prioridade === 'P3' ? 'status-p3' : 'status-p4';
+
+            const alertHTML = `
+                <div class="noc-alert">
+                    <div class="noc-alert-header">
+                        <div class="alert-priority-dot ${priorityClass}"></div>
+                        <div class="alert-header-text">
+                            <h2>NOC Informativo</h2>
+                            <p>Chamado #${chamadoId}</p>
+                        </div>
+                    </div>
+
+                    <div class="noc-alert-content">
+                        <div class="alert-section">
+                            <div class="alert-section-title"><i class="fas fa-clipboard-list"></i> Informações do Chamado</div>
+                            <div class="alert-grid">
+                                <div class="alert-field">
+                                    <span class="alert-label">ID do Chamado</span>
+                                    <span class="alert-value">${chamadoId}</span>
+                                </div>
+                                <div class="alert-field">
+                                    <span class="alert-label">Prioridade</span>
+                                    <span class="alert-value critical"><span class="status-badge ${priorityClass}"><span class="status-dot"></span>${prioridade}</span></span>
+                                </div>
+                                <div class="alert-field" style="grid-column: 1 / -1;">
+                                    <span class="alert-label">Descrição</span>
+                                    <span class="alert-value">${descricao}</span>
+                                </div>
+                                <div class="alert-field">
+                                    <span class="alert-label">Grupo Solucionador</span>
+                                    <span class="alert-value">${grupo}</span>
+                                </div>
+                                <div class="alert-field">
+                                    <span class="alert-label">Status</span>
+                                    <span class="alert-value">${status}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert-section">
+                            <div class="alert-section-title"><i class="fas fa-hourglass-start"></i> Linha do Tempo</div>
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <div class="timeline-label">Início</div>
+                                    <div class="timeline-value">${inicio}</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-label">Término</div>
+                                    <div class="timeline-value">${fim}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert-section">
+                            <div class="alert-section-title"><i class="fas fa-exclamation-triangle"></i> Impacto e Configuração</div>
+                            <div class="alert-grid">
+                                <div class="alert-field">
+                                    <span class="alert-label">Impacto</span>
+                                    <span class="alert-value ${!impacto || impacto === 'Não especificado' ? 'muted' : ''}">${impacto}</span>
+                                </div>
+                                <div class="alert-field">
+                                    <span class="alert-label">Sistema</span>
+                                    <span class="alert-value ${!sistema || sistema === 'Não especificado' ? 'muted' : ''}">${sistema}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert-section">
+                            <div class="alert-section-title"><i class="fas fa-server"></i> Item de Configuração Afetado (IC)</div>
+                            <div class="impacted-items">
+                                <div class="impacted-item">
+                                    <div class="impacted-label">IC Afetado</div>
+                                    <div class="impacted-value">${icAfetado}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert-footer">
+                        <button class="btn btn-primary" onclick="printAlert()">
+                            <i class="fas fa-print"></i> Imprimir
+                        </button>
+                        <button class="btn btn-primary" onclick="copyAlert()">
+                            <i class="fas fa-copy"></i> Copiar para WhatsApp/Teams
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('alertPreview').innerHTML = alertHTML;
+        }
+
+        function printAlert() {
+            window.print();
+        }
+
+        function copyAlert() {
+            try {
+                const chamadoId = document.getElementById('chamadoId').value || 'N/A';
+                const prioridade = document.getElementById('prioridade').value || 'N/A';
+                const descricao = document.getElementById('descricao').value || 'N/A';
+                const grupo = document.getElementById('grupo').value || 'N/A';
+                const status = document.getElementById('status').value || 'N/A';
+                const impacto = document.getElementById('impacto').value || 'N/A';
+                const sistema = document.getElementById('sistema').value || 'N/A';
+                const inicio = document.getElementById('inicio').value || 'N/A';
+                const fim = document.getElementById('fim').value || 'Em aberto';
+                const icAfetado = document.getElementById('icAfetado').value || 'N/A';
+
+                const priorityEmoji = prioridade === 'P0' ? '🔴' : prioridade === 'P1' ? '🟠' : prioridade === 'P2' ? '🟡' : prioridade === 'P3' ? '🟢' : '🔵';
+
+                const mensagem = `🚨 NOC INFORMATIVO
+
+${priorityEmoji} *PRIORIDADE: ${prioridade}*
+*CHAMADO: #${chamadoId}*
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 *DESCRIÇÃO*
+${descricao}
+
+🎯 *INFORMAÇÕES DO CHAMADO*
+• *ID:* ${chamadoId}
+• *Prioridade:* ${prioridade}
+• *Grupo Solucionador:* ${grupo}
+• *Status:* ${status}
+
+⏱️ *LINHA DO TEMPO*
+• *Início:* ${inicio}
+• *Término:* ${fim}
+
+💥 *IMPACTO*
+• *Impacto:* ${impacto}
+• *Sistema:* ${sistema}
+
+🖥️ *ITEM DE CONFIGURAÇÃO AFETADO*
+${icAfetado}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(mensagem).then(() => {
+                        showToast('✅ Alerta copiado com sucesso! Pronto para WhatsApp/Teams', 'success');
+                    }).catch(() => {
+                        fallbackCopy(mensagem);
+                    });
+                } else {
+                    fallbackCopy(mensagem);
+                }
+            } catch (error) {
+                console.error('Erro ao copiar:', error);
+                showToast('⚠️ Erro ao processar alerta. Tente novamente.', 'error');
+            }
+        }
+
+        function fallbackCopy(texto) {
+            const textArea = document.createElement('textarea');
+            textArea.value = texto;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast('✅ Alerta copiado com sucesso! Pronto para WhatsApp/Teams', 'success');
+            } catch (err) {
+                showToast('⚠️ Não foi possível copiar. Tente usar Ctrl+C ou revise as permissões', 'error');
+            } finally {
+                document.body.removeChild(textArea);
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('chamadoId').value = '';
+            document.getElementById('prioridade').value = '';
+            document.getElementById('descricao').value = '';
+            document.getElementById('grupo').value = '';
+            document.getElementById('status').value = '';
+            document.getElementById('impacto').value = '';
+            document.getElementById('sistema').value = '';
+            document.getElementById('inicio').value = '';
+            document.getElementById('fim').value = '';
+            document.getElementById('icAfetado').value = '';
+            document.getElementById('alertPreview').innerHTML = '';
+        }
+
+        function showToast(message, type = 'default') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.remove('success', 'error', 'warning', 'hidden');
+            if (type && type !== 'default') {
+                toast.classList.add(type);
+            }
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3500);
+        }
+
+        // Gerar alerta inicial ao carregar
+        window.addEventListener('DOMContentLoaded', generateAlert);
+    </script>
+
+<script src="https://static.app/js/static.js" type="text/javascript"></script>
+</body>
+</html>
